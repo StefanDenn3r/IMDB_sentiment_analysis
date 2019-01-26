@@ -34,9 +34,11 @@ def build_and_evaluate(data, max_features, dropout=0.2, lstm_units=32, fc_hidden
     model.add(Dense(units=1, activation='sigmoid'))
     model.compile(loss='binary_crossentropy', optimizer=adam(lr), metrics=['accuracy'])
 
-    return model.fit(x_train, y_train, validation_data=(x_val, y_val), epochs=100,
-                     batch_size=512, verbose=verbose,
-                     callbacks=[EarlyStopping(monitor='val_loss', patience=5, mode='auto', baseline=None)])
+    history = model.fit(x_train, y_train, validation_data=(x_val, y_val), epochs=100,
+                        batch_size=512, verbose=verbose,
+                        callbacks=[EarlyStopping(monitor='val_loss', patience=5, mode='auto', baseline=None)])
+    plot_history(history)
+    return history.history['val_acc'][-1]
 
 
 def plot_history(history):
