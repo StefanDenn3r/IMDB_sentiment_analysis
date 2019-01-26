@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
+import os
 from bayes_opt import BayesianOptimization
-from keras.callbacks import EarlyStopping
+from keras.callbacks import EarlyStopping, ModelCheckpoint
 from keras.datasets import imdb
 from keras.layers import Dense, Embedding, Dropout, LSTM
 from keras.models import Sequential
@@ -36,7 +37,9 @@ def build_and_evaluate(data, max_features, dropout=0.2, lstm_units=32, fc_hidden
 
     history = model.fit(x_train, y_train, validation_data=(x_val, y_val), epochs=100,
                         batch_size=512, verbose=verbose,
-                        callbacks=[EarlyStopping(monitor='val_loss', patience=5, mode='auto', baseline=None)])
+                        callbacks=[EarlyStopping(monitor='val_loss', patience=5, baseline=None),
+                                   ModelCheckpoint(model_dir + '/best_model.h5', monitor='val_loss',
+                                                   save_best_only=True)])
     plot_history(history)
     return history.history['val_acc'][-1]
 
@@ -80,6 +83,11 @@ def bayesian_opt(data, max_features):
         n_iter=30,
     )
 
+
+model_dir = 'models'
+
+if not os.path.exists(model_dir):
+    os.makedirs(model_dir)
 
 # overfit_batch()
 bayesian_opt(prepare_data(max_features=5000, max_length=500), 5000)
